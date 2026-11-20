@@ -1,0 +1,97 @@
+/* ===== Colours and font, stored in CSS variables ===== */
+:root {
+  --bg: #17162a;
+  --surface: #211f38;
+  --text: #f4f1fa;
+  --muted: #a9a6c2;
+  --line: #34314f;
+  --focus: #ff8a5b;   /* coral = focus */
+  --break: #7dd3a8;   /* mint = break */
+  --extra: #ffd166;   /* amber = extra time */
+  --on-color: #17162a;
+  --font: "Manrope", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.55;
+}
+
+h1, p { margin: 0; }
+
+/* ===== Page layout ===== */
+.app {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 2rem;
+}
+
+.topbar { margin-bottom: 2rem; }
+.brand { font-weight: 800; font-size: 1.1rem; }
+
+/* ===== Timer ===== */
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.phase-label {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--focus);
+  margin-bottom: 1.5rem;
+}
+
+.time {
+  font-size: clamp(4rem, 18vw, 7rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.message {
+  min-height: 3.1em;
+  max-width: 26rem;
+  margin: 1.5rem 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* ===== Buttons ===== */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.button {
+  min-height: 3rem;
+  padding: 0 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--focus);
+  color: var(--on-color);
+  transition: transform 0.15s ease;
+}
+.button:active { transform: scale(0.97); }
+.button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.button-quiet {
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px solid var(--line);
+}
+.button-quiet:hover { color: var(--text); border-color: var(--muted); }
