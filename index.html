@@ -25,6 +25,7 @@
   </svg>
   <div class="ring-center">
     <p class="time" id="time" role="timer">25:00</p>
+    <p class="sub-time" id="sub-time"></p>
   </div>
 </div>
         <p class="message" id="message" aria-live="polite">Pick a session length and press Start.</p>
@@ -35,9 +36,31 @@
         </div>
       </section>
             <aside class="panel">
+          <section class="card" aria-labelledby="budget-title">
+  <h2 id="budget-title">This session's budget</h2>
+  <div class="meter">
+    <div class="meter-head">
+      <span class="meter-name">Extra time</span>
+      <span class="meter-value" id="extra-text"></span>
+    </div>
+    <div class="blocks" id="extra-blocks" aria-hidden="true"></div>
+  </div>
+  <div class="meter">
+    <div class="meter-head">
+      <span class="meter-name">Pauses</span>
+      <span class="meter-value" id="pause-text"></span>
+    </div>
+    <div class="dots" id="pause-dots" aria-hidden="true"></div>
+  </div>
+</section>      
         <section class="card" aria-labelledby="length-title">
           <h2 id="length-title">Session length in minutes</h2>
           <div class="presets" id="presets" role="group" aria-labelledby="length-title"></div>
+          <dl class="plan">
+  <div><dt>Break afterwards</dt><dd id="plan-break"></dd></div>
+  <div><dt>Extra time</dt><dd id="plan-extra"></dd></div>
+  <div><dt>Pauses</dt><dd id="plan-pauses"></dd></div>
+</dl>
         </section>
       </aside>
     </main>
