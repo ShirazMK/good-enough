@@ -95,3 +95,4 @@ h1, p { margin: 0; }
   border: 1.5px solid var(--line);
 }
 .button-quiet:hover { color: var(--text); border-color: var(--muted); }
+.button:disabled { opacity: 0.4; cursor: not-allowed; }
