@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Good Enough | A focus timer for perfectionists</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <p class="brand">Good Enough</p>
+    </header>
+
+    <main>
+      <section class="timer">
+        <h1 class="phase-label" id="phase-label">Ready when you are</h1>
+        <p class="time" id="time">25:00</p>
+        <p class="message" id="message" aria-live="polite">Pick a session length and press Start.</p>
+
+        <div class="actions">
+          <button class="button" id="primary" type="button">Start focus</button>
+          <button class="button" id="reset" type="button">Reset</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
