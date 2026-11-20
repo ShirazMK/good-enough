@@ -18,7 +18,15 @@
     <main>
       <section class="timer">
         <h1 class="phase-label" id="phase-label">Ready when you are</h1>
-        <p class="time" id="time">25:00</p>
+<div class="ring-wrap">
+  <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+    <circle class="ring-track" cx="100" cy="100" r="88" />
+    <circle class="ring-progress" id="ring-progress" cx="100" cy="100" r="88" />
+  </svg>
+  <div class="ring-center">
+    <p class="time" id="time" role="timer">25:00</p>
+  </div>
+</div>
         <p class="message" id="message" aria-live="polite">Pick a session length and press Start.</p>
 
         <div class="actions">

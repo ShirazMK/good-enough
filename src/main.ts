@@ -1,5 +1,5 @@
 // ===== Find elements on the page =====
-function $<T extends HTMLElement>(selector: string): T {
+function $<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
   if (!element) throw new Error(`Missing element: ${selector}`);
   return element;
@@ -10,7 +10,10 @@ const timeEl = $<HTMLParagraphElement>("#time");
 const messageEl = $<HTMLParagraphElement>("#message");
 const primaryButton = $<HTMLButtonElement>("#primary");
 const resetButton = $<HTMLButtonElement>("#reset");
-
+const ringProgressEl = $<SVGCircleElement>("#ring-progress");
+// The circle's circumference: 2 × π × radius (r = 88 in the HTML)
+const RING_LENGTH = 2 * Math.PI * 88;
+ringProgressEl.style.strokeDasharray = String(RING_LENGTH);
 // ===== Settings =====
 const MINUTE = 60 * 1000; // one minute in milliseconds
 const sessionMinutes =25;
@@ -22,6 +25,15 @@ let endTime = 0; // the moment (in ms) when the session ends
 let remainingMs =0;
 
 // ===== Helpers =====
+// How much of the session is done: 0 = nothing, 1 = everything
+function progress(): number {
+  if (phase === "idle") return 0;
+  if (phase === "focus-done") return 1;
+  const total = sessionMinutes * MINUTE;
+  const done = 1 - remaining() / total;
+  return Math.min(1, Math.max(0, done)); // keep it between 0 and 1
+}
+
 function formatTime(ms: number): string {
   const totalSeconds = Math.ceil(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -115,6 +127,7 @@ function render(): void {
   } else {
     timeEl.textContent = formatTime(remaining());
   }
+    ringProgressEl.style.strokeDashoffset = String(RING_LENGTH * (1 - progress()));
 
   const isRunning = phase === "focus" || phase === "paused";
   resetButton.hidden = !isRunning;
@@ -124,6 +137,8 @@ function render(): void {
     : "Good Enough";
 }
 
+// Turn on the ring animation after the first frame has been drawn
+requestAnimationFrame(() => requestAnimationFrame(() => appEl.classList.add("is-ready")));
 
 // ===== The tick: runs 4 times per second =====
 function tick(): void {
