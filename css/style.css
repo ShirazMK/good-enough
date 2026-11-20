@@ -131,3 +131,46 @@ h1, p { margin: 0; }
   align-items: center;
   justify-content: center;
 }
+/* ===== Two-column layout ===== */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21rem; /* timer takes the space, panel is 21rem */
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ===== Side panel ===== */
+.panel { display: grid; gap: 1rem; }
+
+.card {
+  padding: 1.25rem;
+  background: var(--surface);
+  border-radius: 18px;
+}
+.card h2 { margin: 0 0 1rem; font-size: 1rem; font-weight: 800; }
+
+/* ===== Session length buttons ===== */
+.presets {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* six equal columns */
+  gap: 0.35rem;
+}
+
+.preset {
+  min-height: 2.6rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.preset:hover:not(:disabled) { border-color: var(--focus); }
+.preset[aria-pressed="true"] { background: var(--focus); border-color: var(--focus); color: var(--on-color); }
+.preset:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ===== Phones and small windows: one column ===== */
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+}

@@ -7,6 +7,7 @@ function $<T extends Element>(selector: string): T {
 const appEl = $<HTMLDivElement>("#app");              
 const phaseLabelEl = $<HTMLHeadingElement>("#phase-label");
 const timeEl = $<HTMLParagraphElement>("#time");
+const presetsEl = $<HTMLDivElement>("#presets");
 const messageEl = $<HTMLParagraphElement>("#message");
 const primaryButton = $<HTMLButtonElement>("#primary");
 const resetButton = $<HTMLButtonElement>("#reset");
@@ -16,7 +17,29 @@ const RING_LENGTH = 2 * Math.PI * 88;
 ringProgressEl.style.strokeDasharray = String(RING_LENGTH);
 // ===== Settings =====
 const MINUTE = 60 * 1000; // one minute in milliseconds
-const sessionMinutes =25;
+// The lengths a user can choose. "as const" makes the list read-only.
+const SESSION_PRESETS = [25, 35, 50, 60, 75, 90] as const;
+const STORAGE_KEY = "good-enough:session";
+
+// Load the saved length, or use 25 if there is none (or it's invalid)
+function loadSession(): number {
+  try {
+    const saved = Number(localStorage.getItem(STORAGE_KEY));
+    return (SESSION_PRESETS as readonly number[]).includes(saved) ? saved : 25;
+  } catch {
+    return 25; // some browsers block storage (private mode)
+  }
+}
+
+function saveSession(minutes: number): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, String(minutes));
+  } catch {
+    // storage blocked: the app still works, it just won't remember
+  }
+}
+
+let sessionMinutes = loadSession(); // "let" now, because it can change
 
 // ===== State: everything the app needs to remember =====
 type Phase = "idle" | "focus" | "paused" | "focus-done";
@@ -60,6 +83,15 @@ function pause(): void {
   remainingMs = endTime - Date.now();  // remember what's left
   phase = "paused";
   messageEl.textContent = "Paused. Take a breath.";
+  render();
+}
+
+function setSession(minutes: number): void {
+  if (phase === "focus" || phase === "paused") return; // no switching mid-session
+  sessionMinutes = minutes;
+  saveSession(minutes);
+  phase = "idle";
+  messageEl.textContent = `${minutes} minutes it is. Press Start when you're ready.`;
   render();
 }
 
@@ -115,6 +147,19 @@ const BUTTON_LABELS: Record<Phase, string> = {
 };
 
 // ===== Draw the screen from the state =====
+function buildPresets(): void {
+  for (const minutes of SESSION_PRESETS) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "preset";
+    button.dataset.minutes = String(minutes);          // becomes data-minutes="50"
+    button.textContent = String(minutes);
+    button.setAttribute("aria-label", `${minutes} minute session`);
+    button.addEventListener("click", () => setSession(minutes));
+    presetsEl.append(button);
+  }
+}
+
 function render(): void {
   appEl.dataset.phase = phase;                         
   phaseLabelEl.textContent = PHASE_LABELS[phase];
@@ -135,7 +180,13 @@ function render(): void {
   document.title = isRunning
     ? `${formatTime(remaining())} · ${PHASE_LABELS[phase]} | Good Enough`
     : "Good Enough";
-}
+  // Highlight the chosen length; lock the others while a session runs
+  presetsEl.querySelectorAll<HTMLButtonElement>(".preset").forEach((button) => {
+    const isSelected = Number(button.dataset.minutes) === sessionMinutes;
+    button.setAttribute("aria-pressed", String(isSelected));
+    button.disabled = isRunning && !isSelected;
+  });
+  }
 
 // Turn on the ring animation after the first frame has been drawn
 requestAnimationFrame(() => requestAnimationFrame(() => appEl.classList.add("is-ready")));
@@ -152,5 +203,8 @@ function tick(): void {
 // ===== Start everything =====
 primaryButton.addEventListener("click", primaryAction);
 resetButton.addEventListener("click", reset);
+primaryButton.addEventListener("click", primaryAction);
+resetButton.addEventListener("click", reset);
+buildPresets();
 render();
 setInterval(tick, 250);
