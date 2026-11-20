@@ -96,3 +96,8 @@ h1, p { margin: 0; }
 }
 .button-quiet:hover { color: var(--text); border-color: var(--muted); }
 .button:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Hidden elements must really disappear, even if a class gives them a display value */
+[hidden] { display: none !important; }
+
+/* While paused, the label turns grey instead of coral */
+.app[data-phase="paused"] .phase-label { color: var(--muted); }
