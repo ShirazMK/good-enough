@@ -34,6 +34,15 @@
           <button class="button" id="primary" type="button">Start focus</button>
           <button class="button button-quiet" id="reset" type="button">Reset</button>
         </div>
+        <div class="break-picker" id="break-picker" hidden>
+  <p class="break-picker-title">Break length</p>
+  <div class="stepper">
+    <button class="stepper-button" type="button" id="break-less" aria-label="Shorter break">−</button>
+    <output class="stepper-value" id="break-value" aria-live="polite">5 min</output>
+    <button class="stepper-button" type="button" id="break-more" aria-label="Longer break">+</button>
+  </div>
+  <p class="break-hint" id="break-hint"></p>
+</div>
       </section>
             <aside class="panel">
           <section class="card" aria-labelledby="budget-title">

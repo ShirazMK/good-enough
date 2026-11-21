@@ -195,3 +195,36 @@ h1, p { margin: 0; }
 .plan div { display: flex; justify-content: space-between; gap: 1rem; }
 .plan dt { color: var(--muted); }
 .plan dd { margin: 0; font-weight: 800; }
+
+/* ===== Break picker ===== */
+.break-picker {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  max-width: 26rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--break) 9%, transparent);
+}
+.break-picker-title { font-weight: 600; margin-bottom: 0.6rem; }
+
+.stepper { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.stepper-button {
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1.5px solid var(--break);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--break);
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.stepper-button:disabled { opacity: 0.35; cursor: not-allowed; }
+.stepper-value { min-width: 5rem; font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.break-hint {
+  margin-top: 0.85rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  text-align: left;
+}

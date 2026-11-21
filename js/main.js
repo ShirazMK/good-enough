@@ -1,4 +1,4 @@
-"use strict";
+import { PAUSE_MAX_MINUTES, extensionBudget, pauseBudget, breakLength, } from "./budget.js";
 // ===== Find elements on the page =====
 function $(selector) {
     const element = document.querySelector(selector);
@@ -22,6 +22,14 @@ const MINUTE = 60 * 1000; // one minute in milliseconds
 // The lengths a user can choose. "as const" makes the list read-only.
 const SESSION_PRESETS = [25, 35, 50, 60, 75, 90];
 const STORAGE_KEY = "good-enough:session";
+const subTimeEl = $("#sub-time");
+const extraTextEl = $("#extra-text");
+const extraBlocksEl = $("#extra-blocks");
+const pauseTextEl = $("#pause-text");
+const pauseDotsEl = $("#pause-dots");
+const planBreakEl = $("#plan-break");
+const planExtraEl = $("#plan-extra");
+const planPausesEl = $("#plan-pauses");
 // Load the saved length, or use 25 if there is none (or it's invalid)
 function loadSession() {
     try {
@@ -44,6 +52,11 @@ let sessionMinutes = loadSession(); // "let" now, because it can change
 let phase = "idle";
 let endTime = 0; // the moment (in ms) when the session ends
 let remainingMs = 0;
+let pauseEndsAt = 0; // the moment the current pause ends by itself
+let pausesUsed = 0;
+let extensionUsed = 0; // extra minutes used (we'll use this in Step 9b)
+const pausesLeft = () => pauseBudget(sessionMinutes) - pausesUsed;
+const extraLeft = () => extensionBudget(sessionMinutes) - extensionUsed;
 // ===== Helpers =====
 // How much of the session is done: 0 = nothing, 1 = everything
 function progress() {
@@ -68,18 +81,11 @@ function remaining() {
 }
 // ===== Actions: they change the state, then redraw =====
 function startFocus() {
+    pausesUsed = 0;
+    extensionUsed = 0;
     phase = "focus";
     endTime = Date.now() + sessionMinutes * MINUTE;
     messageEl.textContent = "Focus. One thing at a time.";
-    render();
-}
-// NEW
-function pause() {
-    if (phase !== "focus")
-        return;
-    remainingMs = endTime - Date.now(); // remember what's left
-    phase = "paused";
-    messageEl.textContent = "Paused. Take a breath.";
     render();
 }
 function setSession(minutes) {
@@ -91,17 +97,29 @@ function setSession(minutes) {
     messageEl.textContent = `${minutes} minutes it is. Press Start when you're ready.`;
     render();
 }
-// NEW
-function resume() {
+function pause() {
+    if (phase !== "focus" || pausesLeft() <= 0)
+        return; // no pauses left: do nothing
+    const now = Date.now();
+    remainingMs = endTime - now;
+    pauseEndsAt = now + PAUSE_MAX_MINUTES * MINUTE;
+    pausesUsed++;
+    phase = "paused";
+    messageEl.textContent = `Paused. The timer continues in ${PAUSE_MAX_MINUTES} minutes either way.`;
+    render();
+}
+function resume(auto = false) {
     if (phase !== "paused")
         return;
-    endTime = Date.now() + remainingMs; // new end time from now
+    endTime = Date.now() + remainingMs;
     phase = "focus";
-    messageEl.textContent = "Welcome back. Where were we?";
+    messageEl.textContent = auto ? "Pause over. Back to it." : "Welcome back. Where were we?";
     render();
 }
 // NEW
 function reset() {
+    pausesUsed = 0;
+    extensionUsed = 0;
     phase = "idle";
     messageEl.textContent = "Reset. Start again whenever you're ready.";
     render();
@@ -150,10 +168,37 @@ function buildPresets() {
         presetsEl.append(button);
     }
 }
+// Creates `count` small elements; the first `used` ones are filled in
+function makeMarks(count, used, className) {
+    return Array.from({ length: count }, (_, i) => {
+        const mark = document.createElement("span");
+        mark.className = i < used ? `${className} is-used` : className;
+        return mark;
+    });
+}
+function renderBudget() {
+    // Extra time: one block per 5 minutes
+    const extra = extensionBudget(sessionMinutes);
+    extraBlocksEl.replaceChildren(...makeMarks(extra / 5, extensionUsed / 5, "block"));
+    extraTextEl.textContent = extra === 0 ? "None at 90 min: that's the maximum." : `${extraLeft()} of ${extra} min left`;
+    // Pauses: one dot each
+    const pauses = pauseBudget(sessionMinutes);
+    pauseDotsEl.replaceChildren(...makeMarks(pauses, pausesUsed, "dot"));
+    pauseTextEl.textContent = `${pausesLeft()} of ${pauses} left, ${PAUSE_MAX_MINUTES} min each`;
+    // The plan for the chosen length
+    planBreakEl.textContent = `${breakLength(sessionMinutes)} min`;
+    planExtraEl.textContent = extra === 0 ? "None" : `Up to ${extra} min`;
+    planPausesEl.textContent = `${pauses} × ${PAUSE_MAX_MINUTES} min`;
+}
 function render() {
     appEl.dataset.phase = phase;
     phaseLabelEl.textContent = PHASE_LABELS[phase];
     primaryButton.textContent = BUTTON_LABELS[phase];
+    // When the pauses are used up, the Pause button says so and can't be clicked
+    if (phase === "focus" && pausesLeft() <= 0) {
+        primaryButton.textContent = "No pauses left";
+    }
+    primaryButton.disabled = phase === "focus" && pausesLeft() <= 0;
     if (phase === "idle") {
         timeEl.textContent = formatTime(sessionMinutes * MINUTE);
     }
@@ -163,6 +208,10 @@ function render() {
     else {
         timeEl.textContent = formatTime(remaining());
     }
+    subTimeEl.textContent =
+        phase === "paused"
+            ? `Resumes by itself in ${formatTime(Math.max(0, pauseEndsAt - Date.now()))}`
+            : "";
     ringProgressEl.style.strokeDashoffset = String(RING_LENGTH * (1 - progress()));
     const isRunning = phase === "focus" || phase === "paused";
     resetButton.hidden = !isRunning;
@@ -175,13 +224,18 @@ function render() {
         button.setAttribute("aria-pressed", String(isSelected));
         button.disabled = isRunning && !isSelected;
     });
+    renderBudget();
 }
 // Turn on the ring animation after the first frame has been drawn
 requestAnimationFrame(() => requestAnimationFrame(() => appEl.classList.add("is-ready")));
 // ===== The tick: runs 4 times per second =====
 function tick() {
-    if (phase === "focus" && Date.now() >= endTime) {
+    const now = Date.now();
+    if (phase === "focus" && now >= endTime) {
         finishFocus();
+    }
+    else if (phase === "paused" && now >= pauseEndsAt) {
+        resume(true); // the 3 minutes are over
     }
     else {
         render();

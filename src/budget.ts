@@ -11,6 +11,11 @@ export const PAUSE_MAX_MINUTES = 3;
 /** One pause is earned for every full block of this many minutes. */
 export const MINUTES_PER_PAUSE = 25;
 
+export const BREAK_MIN = 3;
+
+export const BREAK_MAX =30;
+
+
 /**
  * Extra time for one session: half the session, rounded down to
  * steps of 5, but the total may never pass MAX_SESSION_TOTAL.
@@ -33,4 +38,9 @@ export function pauseBudget(sessionMinutes: number): number {
  */
 export function breakLength(workedMinutes: number): number {
   return Math.max(5, Math.round(workedMinutes / 5));
+}
+export function compareBreak (chosen: number, recommended: number):"shorter" | "recommended" | "longer"{
+  if (chosen< recommended) return "shorter";
+if (chosen>recommended) return "longer";
+  return "recommended";
 }
