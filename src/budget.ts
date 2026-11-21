@@ -11,6 +11,9 @@ export const PAUSE_MAX_MINUTES = 3;
 /** One pause is earned for every full block of this many minutes. */
 export const MINUTES_PER_PAUSE = 25;
 
+/** The extension buttons appear when this many minutes are left. */
+export const SHOW_EXTEND_BEFORE_END_MINUTES = 2;
+
 export const BREAK_MIN = 3;
 
 export const BREAK_MAX = 30;
