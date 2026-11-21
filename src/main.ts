@@ -12,7 +12,7 @@ function $<T extends Element>(selector: string): T {
   if (!element) throw new Error(`Missing element: ${selector}`);
   return element;
 }
-const appEl = $<HTMLDivElement>("#app");              
+const appEl = $<HTMLDivElement>("#app");
 const phaseLabelEl = $<HTMLHeadingElement>("#phase-label");
 const timeEl = $<HTMLParagraphElement>("#time");
 const presetsEl = $<HTMLDivElement>("#presets");
@@ -20,14 +20,6 @@ const messageEl = $<HTMLParagraphElement>("#message");
 const primaryButton = $<HTMLButtonElement>("#primary");
 const resetButton = $<HTMLButtonElement>("#reset");
 const ringProgressEl = $<SVGCircleElement>("#ring-progress");
-// The circle's circumference: 2 × π × radius (r = 88 in the HTML)
-const RING_LENGTH = 2 * Math.PI * 88;
-ringProgressEl.style.strokeDasharray = String(RING_LENGTH);
-// ===== Settings =====
-const MINUTE = 60 * 1000; // one minute in milliseconds
-// The lengths a user can choose. "as const" makes the list read-only.
-const SESSION_PRESETS = [25, 35, 50, 60, 75, 90] as const;
-const STORAGE_KEY = "good-enough:session";
 const subTimeEl = $<HTMLParagraphElement>("#sub-time");
 const extraTextEl = $<HTMLSpanElement>("#extra-text");
 const extraBlocksEl = $<HTMLDivElement>("#extra-blocks");
@@ -41,6 +33,14 @@ const breakValueEl = $<HTMLOutputElement>("#break-value");
 const breakHintEl = $<HTMLParagraphElement>("#break-hint");
 const breakLessButton = $<HTMLButtonElement>("#break-less");
 const breakMoreButton = $<HTMLButtonElement>("#break-more");
+// The circle's circumference: 2 × π × radius (r = 88 in the HTML)
+const RING_LENGTH = 2 * Math.PI * 88;
+ringProgressEl.style.strokeDasharray = String(RING_LENGTH);
+// ===== Settings =====
+const MINUTE = 60 * 1000; // one minute in milliseconds
+// The lengths a user can choose. "as const" makes the list read-only.
+const SESSION_PRESETS = [25, 35, 50, 60, 75, 90] as const;
+const STORAGE_KEY = "good-enough:session";
 
 // Load the saved length, or use 25 if there is none (or it's invalid)
 function loadSession(): number {
@@ -66,10 +66,10 @@ let sessionMinutes = loadSession(); // "let" now, because it can change
 type Phase = "idle" | "focus" | "paused" | "focus-done";
 let phase: Phase = "idle";
 let endTime = 0; // the moment (in ms) when the session ends
-let remainingMs =0;
-let pauseEndsAt = 0;    // the moment the current pause ends by itself
+let remainingMs = 0;
+let pauseEndsAt = 0; // the moment the current pause ends by itself
 let pausesUsed = 0;
-let extensionUsed = 0;  // extra minutes used (we'll use this in Step 9b)
+let extensionUsed = 0; // extra minutes used (we'll use this in Step 9b)
 
 const pausesLeft = (): number => pauseBudget(sessionMinutes) - pausesUsed;
 const extraLeft = (): number => extensionBudget(sessionMinutes) - extensionUsed;
@@ -92,13 +92,13 @@ function formatTime(ms: number): string {
 }
 
 function remaining(): number {
-  if(phase =="paused") return remainingMs;
+  if (phase === "paused") return remainingMs;
   return Math.max(0, endTime - Date.now());
 }
 
 // ===== Actions: they change the state, then redraw =====
 function startFocus(): void {
-    pausesUsed = 0;
+  pausesUsed = 0;
   extensionUsed = 0;
   phase = "focus";
   endTime = Date.now() + sessionMinutes * MINUTE;
@@ -130,13 +130,15 @@ function resume(auto = false): void {
   if (phase !== "paused") return;
   endTime = Date.now() + remainingMs;
   phase = "focus";
-  messageEl.textContent = auto ? "Pause over. Back to it." : "Welcome back. Where were we?";
+  messageEl.textContent = auto
+    ? "Pause over. Back to it."
+    : "Welcome back. Where were we?";
   render();
 }
 
 // NEW
 function reset(): void {
-    pausesUsed = 0;
+  pausesUsed = 0;
   extensionUsed = 0;
   phase = "idle";
   messageEl.textContent = "Reset. Start again whenever you're ready.";
@@ -184,7 +186,7 @@ function buildPresets(): void {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "preset";
-    button.dataset.minutes = String(minutes);          // becomes data-minutes="50"
+    button.dataset.minutes = String(minutes); // becomes data-minutes="50"
     button.textContent = String(minutes);
     button.setAttribute("aria-label", `${minutes} minute session`);
     button.addEventListener("click", () => setSession(minutes));
@@ -193,7 +195,11 @@ function buildPresets(): void {
 }
 
 // Creates `count` small elements; the first `used` ones are filled in
-function makeMarks(count: number, used: number, className: string): HTMLSpanElement[] {
+function makeMarks(
+  count: number,
+  used: number,
+  className: string,
+): HTMLSpanElement[] {
   return Array.from({ length: count }, (_, i) => {
     const mark = document.createElement("span");
     mark.className = i < used ? `${className} is-used` : className;
@@ -204,8 +210,13 @@ function makeMarks(count: number, used: number, className: string): HTMLSpanElem
 function renderBudget(): void {
   // Extra time: one block per 5 minutes
   const extra = extensionBudget(sessionMinutes);
-  extraBlocksEl.replaceChildren(...makeMarks(extra / 5, extensionUsed / 5, "block"));
-  extraTextEl.textContent = extra === 0 ? "None at 90 min: that's the maximum." : `${extraLeft()} of ${extra} min left`;
+  extraBlocksEl.replaceChildren(
+    ...makeMarks(extra / 5, extensionUsed / 5, "block"),
+  );
+  extraTextEl.textContent =
+    extra === 0
+      ? "None at 90 min: that's the maximum."
+      : `${extraLeft()} of ${extra} min left`;
 
   // Pauses: one dot each
   const pauses = pauseBudget(sessionMinutes);
@@ -219,7 +230,7 @@ function renderBudget(): void {
 }
 
 function render(): void {
-  appEl.dataset.phase = phase;                         
+  appEl.dataset.phase = phase;
   phaseLabelEl.textContent = PHASE_LABELS[phase];
   primaryButton.textContent = BUTTON_LABELS[phase];
   // When the pauses are used up, the Pause button says so and can't be clicked
@@ -235,11 +246,13 @@ function render(): void {
   } else {
     timeEl.textContent = formatTime(remaining());
   }
-    subTimeEl.textContent =
+  subTimeEl.textContent =
     phase === "paused"
       ? `Resumes by itself in ${formatTime(Math.max(0, pauseEndsAt - Date.now()))}`
       : "";
-    ringProgressEl.style.strokeDashoffset = String(RING_LENGTH * (1 - progress()));
+  ringProgressEl.style.strokeDashoffset = String(
+    RING_LENGTH * (1 - progress()),
+  );
 
   const isRunning = phase === "focus" || phase === "paused";
   resetButton.hidden = !isRunning;
@@ -253,11 +266,8 @@ function render(): void {
     button.setAttribute("aria-pressed", String(isSelected));
     button.disabled = isRunning && !isSelected;
   });
-    renderBudget();
-  }
-
-// Turn on the ring animation after the first frame has been drawn
-requestAnimationFrame(() => requestAnimationFrame(() => appEl.classList.add("is-ready")));
+  renderBudget();
+}
 
 // ===== The tick: runs 4 times per second =====
 function tick(): void {
@@ -274,8 +284,11 @@ function tick(): void {
 // ===== Start everything =====
 primaryButton.addEventListener("click", primaryAction);
 resetButton.addEventListener("click", reset);
-primaryButton.addEventListener("click", primaryAction);
-resetButton.addEventListener("click", reset);
 buildPresets();
 render();
 setInterval(tick, 250);
+
+// Turn on the ring animation after the first frame has been drawn
+requestAnimationFrame(() =>
+  requestAnimationFrame(() => appEl.classList.add("is-ready")),
+);

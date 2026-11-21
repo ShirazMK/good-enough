@@ -13,8 +13,7 @@ export const MINUTES_PER_PAUSE = 25;
 
 export const BREAK_MIN = 3;
 
-export const BREAK_MAX =30;
-
+export const BREAK_MAX = 30;
 
 /**
  * Extra time for one session: half the session, rounded down to
@@ -39,8 +38,11 @@ export function pauseBudget(sessionMinutes: number): number {
 export function breakLength(workedMinutes: number): number {
   return Math.max(5, Math.round(workedMinutes / 5));
 }
-export function compareBreak (chosen: number, recommended: number):"shorter" | "recommended" | "longer"{
-  if (chosen< recommended) return "shorter";
-if (chosen>recommended) return "longer";
+export function compareBreak(
+  chosen: number,
+  recommended: number,
+): "shorter" | "recommended" | "longer" {
+  if (chosen < recommended) return "shorter";
+  if (chosen > recommended) return "longer";
   return "recommended";
 }

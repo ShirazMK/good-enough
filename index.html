@@ -1,80 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Good Enough | A focus timer for perfectionists</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <div class="app" id="app">
-    <header class="topbar">
-      <p class="brand">Good Enough</p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Good Enough | A focus timer for perfectionists</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header class="topbar">
+        <p class="brand">Good Enough</p>
+      </header>
 
-    <main class="layout">
-      <section class="timer">
-        <h1 class="phase-label" id="phase-label">Ready when you are</h1>
-<div class="ring-wrap">
-  <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
-    <circle class="ring-track" cx="100" cy="100" r="88" />
-    <circle class="ring-progress" id="ring-progress" cx="100" cy="100" r="88" />
-  </svg>
-  <div class="ring-center">
-    <p class="time" id="time" role="timer">25:00</p>
-    <p class="sub-time" id="sub-time"></p>
-  </div>
-</div>
-        <p class="message" id="message" aria-live="polite">Pick a session length and press Start.</p>
+      <main class="layout">
+        <section class="timer">
+          <h1 class="phase-label" id="phase-label">Ready when you are</h1>
+          <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="ring-track" cx="100" cy="100" r="88" />
+              <circle
+                class="ring-progress"
+                id="ring-progress"
+                cx="100"
+                cy="100"
+                r="88"
+              />
+            </svg>
+            <div class="ring-center">
+              <p class="time" id="time" role="timer">25:00</p>
+              <p class="sub-time" id="sub-time"></p>
+            </div>
+          </div>
+          <p class="message" id="message" aria-live="polite">
+            Pick a session length and press Start.
+          </p>
 
-        <div class="actions">
-          <button class="button" id="primary" type="button">Start focus</button>
-          <button class="button button-quiet" id="reset" type="button">Reset</button>
-        </div>
-        <div class="break-picker" id="break-picker" hidden>
-  <p class="break-picker-title">Break length</p>
-  <div class="stepper">
-    <button class="stepper-button" type="button" id="break-less" aria-label="Shorter break">−</button>
-    <output class="stepper-value" id="break-value" aria-live="polite">5 min</output>
-    <button class="stepper-button" type="button" id="break-more" aria-label="Longer break">+</button>
-  </div>
-  <p class="break-hint" id="break-hint"></p>
-</div>
-      </section>
-            <aside class="panel">
-          <section class="card" aria-labelledby="budget-title">
-  <h2 id="budget-title">This session's budget</h2>
-  <div class="meter">
-    <div class="meter-head">
-      <span class="meter-name">Extra time</span>
-      <span class="meter-value" id="extra-text"></span>
-    </div>
-    <div class="blocks" id="extra-blocks" aria-hidden="true"></div>
-  </div>
-  <div class="meter">
-    <div class="meter-head">
-      <span class="meter-name">Pauses</span>
-      <span class="meter-value" id="pause-text"></span>
-    </div>
-    <div class="dots" id="pause-dots" aria-hidden="true"></div>
-  </div>
-</section>      
-        <section class="card" aria-labelledby="length-title">
-          <h2 id="length-title">Session length in minutes</h2>
-          <div class="presets" id="presets" role="group" aria-labelledby="length-title"></div>
-          <dl class="plan">
-  <div><dt>Break afterwards</dt><dd id="plan-break"></dd></div>
-  <div><dt>Extra time</dt><dd id="plan-extra"></dd></div>
-  <div><dt>Pauses</dt><dd id="plan-pauses"></dd></div>
-</dl>
+          <div class="actions">
+            <button class="button" id="primary" type="button">
+              Start focus
+            </button>
+            <button class="button button-quiet" id="reset" type="button">
+              Reset
+            </button>
+          </div>
+          <div class="break-picker" id="break-picker" hidden>
+            <p class="break-picker-title">Break length</p>
+            <div class="stepper">
+              <button
+                class="stepper-button"
+                type="button"
+                id="break-less"
+                aria-label="Shorter break"
+              >
+                −
+              </button>
+              <output class="stepper-value" id="break-value" aria-live="polite"
+                >5 min</output
+              >
+              <button
+                class="stepper-button"
+                type="button"
+                id="break-more"
+                aria-label="Longer break"
+              >
+                +
+              </button>
+            </div>
+            <p class="break-hint" id="break-hint"></p>
+          </div>
         </section>
-      </aside>
-    </main>
-  </div>
+        <aside class="panel">
+          <section class="card" aria-labelledby="budget-title">
+            <h2 id="budget-title">This session's budget</h2>
+            <div class="meter">
+              <div class="meter-head">
+                <span class="meter-name">Extra time</span>
+                <span class="meter-value" id="extra-text"></span>
+              </div>
+              <div class="blocks" id="extra-blocks" aria-hidden="true"></div>
+            </div>
+            <div class="meter">
+              <div class="meter-head">
+                <span class="meter-name">Pauses</span>
+                <span class="meter-value" id="pause-text"></span>
+              </div>
+              <div class="dots" id="pause-dots" aria-hidden="true"></div>
+            </div>
+          </section>
+          <section class="card" aria-labelledby="length-title">
+            <h2 id="length-title">Session length in minutes</h2>
+            <div
+              class="presets"
+              id="presets"
+              role="group"
+              aria-labelledby="length-title"
+            ></div>
+            <dl class="plan">
+              <div>
+                <dt>Break afterwards</dt>
+                <dd id="plan-break"></dd>
+              </div>
+              <div>
+                <dt>Extra time</dt>
+                <dd id="plan-extra"></dd>
+              </div>
+              <div>
+                <dt>Pauses</dt>
+                <dd id="plan-pauses"></dd>
+              </div>
+            </dl>
+          </section>
+        </aside>
+      </main>
+    </div>
 
-  <script type="module" src="js/main.js"></script>
-</body>
+    <script type="module" src="js/main.js"></script>
+  </body>
 </html>

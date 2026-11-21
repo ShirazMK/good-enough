@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
   "build": "tsc",
-  "watch": "tsc --watch"
+  "watch": "tsc --watch",
+  "format": "prettier --write src css index.html",
+  "format:check": "prettier --check src css index.html"
 },
   "repository": {
     "type": "git",
@@ -18,8 +20,10 @@
   "bugs": {
     "url": "https://github.com/ShirazMK/good-enough/issues"
   },
+  
   "homepage": "https://github.com/ShirazMK/good-enough#readme",
   "devDependencies": {
+    "prettier": "^3.10.1",
     "typescript": "^7.0.2"
   }
 }
