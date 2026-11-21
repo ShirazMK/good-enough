@@ -23,6 +23,10 @@
 .app.in-overtime {
   --current: var(--extra);
 }
+.app[data-phase="break"],
+.app[data-phase="break-done"] {
+  --current: var(--break);
+}
 
 /* ===== Base ===== */
 * {

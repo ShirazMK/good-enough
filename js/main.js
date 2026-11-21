@@ -82,6 +82,7 @@ let pauseEndsAt = 0; // the moment the current pause ends by itself
 let pausesUsed = 0;
 let extensionUsed = 0; // extra minutes used this session
 let extensionsCount = 0; // how often "+" was pressed this session
+let breakMinutes = 5; // the break the user will take
 const pausesLeft = () => pauseBudget(sessionMinutes) - pausesUsed;
 const extraLeft = () => extensionBudget(sessionMinutes) - extensionUsed;
 const workedMinutes = () => sessionMinutes + extensionUsed;
@@ -90,11 +91,11 @@ const workedMinutes = () => sessionMinutes + extensionUsed;
 function progress() {
     if (phase === "idle")
         return 0;
-    if (phase === "focus-done")
+    if (phase === "focus-done" || phase === "break-done")
         return 1;
-    const total = workedMinutes() * MINUTE;
-    const done = 1 - remaining() / total;
-    return Math.min(1, Math.max(0, done)); // keep it between 0 and 1
+    const minutes = phase === "break" ? breakMinutes : workedMinutes();
+    const done = 1 - remaining() / (minutes * MINUTE);
+    return Math.min(1, Math.max(0, done));
 }
 function formatTime(ms) {
     const totalSeconds = Math.ceil(ms / 1000);
@@ -118,8 +119,8 @@ function startFocus() {
     render();
 }
 function setSession(minutes) {
-    if (phase === "focus" || phase === "paused")
-        return; // no switching mid-session
+    if (phase === "focus" || phase === "paused" || phase === "break")
+        return;
     sessionMinutes = minutes;
     saveSession(minutes);
     phase = "idle";
@@ -175,15 +176,29 @@ function reset() {
     render();
 }
 function finishFocus() {
+    breakMinutes = breakLength(workedMinutes());
     phase = "focus-done";
     messageEl.textContent =
         extraLeft() > 0 ? pick(END_MESSAGES) : NO_BUDGET_MESSAGE;
     render();
 }
+function startBreak() {
+    if (phase !== "focus-done")
+        return;
+    phase = "break";
+    endTime = Date.now() + breakMinutes * MINUTE; // same end-time trick as focus
+    messageEl.textContent = "Stand up, stretch, look out of a window.";
+    render();
+}
+function finishBreak() {
+    phase = "break-done";
+    messageEl.textContent = "Break's over. Ready for the next one?";
+    render();
+}
 function primaryAction() {
     switch (phase) {
         case "idle":
-        case "focus-done":
+        case "break-done":
             startFocus();
             break;
         case "focus":
@@ -192,6 +207,12 @@ function primaryAction() {
         case "paused":
             resume();
             break;
+        case "focus-done":
+            startBreak();
+            break;
+        case "break":
+            finishBreak(); // "Skip break"
+            break;
     }
 }
 const PHASE_LABELS = {
@@ -199,12 +220,16 @@ const PHASE_LABELS = {
     focus: "Focus",
     paused: "Paused",
     "focus-done": "Session done",
+    break: "Break",
+    "break-done": "Break's over",
 };
 const BUTTON_LABELS = {
     idle: "Start focus",
     focus: "Pause",
     paused: "Resume",
     "focus-done": "Start again",
+    break: "Skip break",
+    "break-done": "Start next session",
 };
 // ===== Draw the screen from the state =====
 function buildPresets() {
@@ -248,12 +273,15 @@ function render() {
     appEl.dataset.phase = phase;
     phaseLabelEl.textContent = PHASE_LABELS[phase];
     primaryButton.textContent = BUTTON_LABELS[phase];
+    if (phase === "focus-done") {
+        primaryButton.textContent = `Start ${breakMinutes}-min break`;
+    }
     // When the pauses are used up, the Pause button says so and can't be clicked
     if (phase === "focus" && pausesLeft() <= 0) {
         primaryButton.textContent = "No pauses left";
     }
     primaryButton.disabled = phase === "focus" && pausesLeft() <= 0;
-    if (phase === "idle") {
+    if (phase === "idle" || phase === "break-done") {
         timeEl.textContent = formatTime(sessionMinutes * MINUTE);
     }
     else if (phase === "focus-done") {
@@ -276,7 +304,8 @@ function render() {
     }
     ringProgressEl.style.strokeDashoffset = String(RING_LENGTH * (1 - progress()));
     // The amber zone: the part of the ring that came from extensions
-    const extraFraction = extensionUsed / workedMinutes();
+    const isBreakPhase = phase === "break" || phase === "break-done";
+    const extraFraction = isBreakPhase ? 0 : extensionUsed / workedMinutes();
     ringExtraEl.style.strokeDasharray = `${RING_LENGTH * extraFraction} ${RING_LENGTH}`;
     ringExtraEl.style.strokeDashoffset = String(-RING_LENGTH * (1 - extraFraction));
     // In overtime, everything turns amber
@@ -308,6 +337,9 @@ function tick() {
     const now = Date.now();
     if (phase === "focus" && now >= endTime) {
         finishFocus();
+    }
+    else if (phase === "break" && now >= endTime) {
+        finishBreak();
     }
     else if (phase === "paused" && now >= pauseEndsAt) {
         resume(true); // the 3 minutes are over
