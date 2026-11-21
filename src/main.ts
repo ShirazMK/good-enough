@@ -3,6 +3,8 @@ import {
   extensionBudget,
   pauseBudget,
   breakLength,
+  BREAK_MIN,
+  BREAK_MAX,
 } from "./budget.js";
 // ===== Find elements on the page =====
 function $<T extends Element>(selector: string): T {
@@ -34,6 +36,11 @@ const pauseDotsEl = $<HTMLDivElement>("#pause-dots");
 const planBreakEl = $<HTMLElement>("#plan-break");
 const planExtraEl = $<HTMLElement>("#plan-extra");
 const planPausesEl = $<HTMLElement>("#plan-pauses");
+const breakPickerEl = $<HTMLDivElement>("#break-picker");
+const breakValueEl = $<HTMLOutputElement>("#break-value");
+const breakHintEl = $<HTMLParagraphElement>("#break-hint");
+const breakLessButton = $<HTMLButtonElement>("#break-less");
+const breakMoreButton = $<HTMLButtonElement>("#break-more");
 
 // Load the saved length, or use 25 if there is none (or it's invalid)
 function loadSession(): number {
