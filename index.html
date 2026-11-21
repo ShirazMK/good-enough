@@ -21,8 +21,10 @@
       <main class="layout">
         <section class="timer">
           <h1 class="phase-label" id="phase-label">Ready when you are</h1>
+
           <div class="ring-wrap">
             <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="ring-track" cx="100" cy="100" r="88" />
               <circle
                 class="ring-extra"
                 id="ring-extra"
@@ -30,7 +32,6 @@
                 cy="100"
                 r="88"
               />
-              <circle class="ring-track" cx="100" cy="100" r="88" />
               <circle
                 class="ring-progress"
                 id="ring-progress"
@@ -44,6 +45,7 @@
               <p class="sub-time" id="sub-time"></p>
             </div>
           </div>
+
           <p class="message" id="message" aria-live="polite">
             Pick a session length and press Start.
           </p>
@@ -56,6 +58,7 @@
               Reset
             </button>
           </div>
+
           <div class="break-picker" id="break-picker" hidden>
             <p class="break-picker-title">Break length</p>
             <div class="stepper">
@@ -81,7 +84,24 @@
             </div>
             <p class="break-hint" id="break-hint"></p>
           </div>
+
+          <div class="extend" id="extend" hidden>
+            <p class="extend-question">Almost done with that last step?</p>
+            <div class="extend-buttons">
+              <button class="button button-extra" type="button" data-extend="5">
+                +5 min
+              </button>
+              <button
+                class="button button-extra"
+                type="button"
+                data-extend="10"
+              >
+                +10 min
+              </button>
+            </div>
+          </div>
         </section>
+
         <aside class="panel">
           <section class="card" aria-labelledby="budget-title">
             <h2 id="budget-title">This session's budget</h2>
@@ -100,6 +120,7 @@
               <div class="dots" id="pause-dots" aria-hidden="true"></div>
             </div>
           </section>
+
           <section class="card" aria-labelledby="length-title">
             <h2 id="length-title">Session length in minutes</h2>
             <div
