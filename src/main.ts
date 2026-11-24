@@ -4,6 +4,7 @@ import {
   extensionBudget,
   pauseBudget,
   breakLength,
+  compareBreak,
   BREAK_MIN,
   BREAK_MAX,
 } from "./budget.js";
@@ -100,6 +101,7 @@ let pausesUsed = 0;
 let extensionUsed = 0; // extra minutes used this session
 let extensionsCount = 0; // how often "+" was pressed this session
 let breakMinutes = 5; // the break the user will take
+let recommendedBreak = 5;
 
 const pausesLeft = (): number => pauseBudget(sessionMinutes) - pausesUsed;
 const extraLeft = (): number => extensionBudget(sessionMinutes) - extensionUsed;
@@ -197,7 +199,8 @@ function reset(): void {
 }
 
 function finishFocus(): void {
-  breakMinutes = breakLength(workedMinutes());
+  recommendedBreak = breakLength(workedMinutes());
+  breakMinutes = recommendedBreak;
   phase = "focus-done";
   messageEl.textContent =
     extraLeft() > 0 ? pick(END_MESSAGES) : NO_BUDGET_MESSAGE;
@@ -215,6 +218,12 @@ function startBreak(): void {
 function finishBreak(): void {
   phase = "break-done";
   messageEl.textContent = "Break's over. Ready for the next one?";
+  render();
+}
+
+function changeBreak(delta: number): void {
+  if (phase !== "focus-done") return;
+  breakMinutes = Math.min(BREAK_MAX, Math.max(BREAK_MIN, breakMinutes + delta));
   render();
 }
 
@@ -306,6 +315,18 @@ function renderBudget(): void {
   planPausesEl.textContent = `${pauses} × ${PAUSE_MAX_MINUTES} min`;
 }
 
+function breakHintText(): string {
+  const worked = workedMinutes();
+  switch (compareBreak(breakMinutes, recommendedBreak)) {
+    case "shorter":
+      return `💡 Short on time? That's okay. After ${worked} min of focus, though, about ${recommendedBreak} min usually helps your brain recover better.`;
+    case "longer":
+      return "💡 A longer break can help after hard work. Just come back when the timer ends. 😉";
+    case "recommended":
+      return `💡 About 1 minute of rest for every 5 you work is a good rhythm. For ${worked} min, that's ${recommendedBreak} min.`;
+  }
+}
+
 function render(): void {
   appEl.dataset.phase = phase;
   phaseLabelEl.textContent = PHASE_LABELS[phase];
@@ -360,8 +381,15 @@ function render(): void {
   extendButtons.forEach((button) => {
     button.disabled = Number(button.dataset.extend) > extraLeft();
   });
+  // The break picker only appears when a session has ended
+  breakPickerEl.hidden = phase !== "focus-done";
+  breakValueEl.textContent = `${breakMinutes} min`;
+  breakHintEl.textContent = breakHintText();
+  breakLessButton.disabled = breakMinutes <= BREAK_MIN;
+  breakMoreButton.disabled = breakMinutes >= BREAK_MAX;
 
-  const isRunning = phase === "focus" || phase === "paused";
+  const isRunning =
+    phase === "focus" || phase === "paused" || phase === "break";
   resetButton.hidden = !isRunning;
 
   document.title = isRunning
@@ -396,6 +424,8 @@ resetButton.addEventListener("click", reset);
 extendButtons.forEach((button) =>
   button.addEventListener("click", () => extend(Number(button.dataset.extend))),
 );
+breakLessButton.addEventListener("click", () => changeBreak(-1));
+breakMoreButton.addEventListener("click", () => changeBreak(1));
 buildPresets();
 render();
 setInterval(tick, 250);
