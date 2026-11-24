@@ -330,26 +330,31 @@ p {
 }
 
 /* ===== Plan list ===== */
-.plan {
-  margin: 0;
+.plan,
+.stats {
+  mergin: 0;
   display: grid;
-  gap: 0.45rem;
+  grid: 0.45rem;
   font-size: 0.95rem;
 }
 
-.plan div {
+.plan div,
+.stats div {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.plan dt {
+.plan dt,
+.stats dt {
   color: var(--muted);
 }
 
-.plan dd {
+.plan dd,
+.stats dd {
   margin: 0;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ===== Break picker ===== */

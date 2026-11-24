@@ -1,4 +1,5 @@
 import { PAUSE_MAX_MINUTES, SHOW_EXTEND_BEFORE_END_MINUTES, extensionBudget, pauseBudget, breakLength, compareBreak, BREAK_MIN, BREAK_MAX, } from "./budget.js";
+import { loadStats, saveStats, todayKey } from "./storage.js";
 // ===== Find elements on the page =====
 function $(selector) {
     const element = document.querySelector(selector);
@@ -52,6 +53,10 @@ const EXTEND_MESSAGES = [
     "This is really the last one. I'm watching. 👀",
 ];
 const NO_BUDGET_MESSAGE = "Nope. It's good enough. Break time. ☕";
+const statSessionsEl = $("#stat-sessions");
+const statFocusEl = $("#stat-focus");
+const statExtraEl = $("#stat-extra");
+const statPausesEl = $("#stat-pauses");
 // Picks a random item from a list
 function pick(list) {
     return list[Math.floor(Math.random() * list.length)];
@@ -84,6 +89,14 @@ let extensionUsed = 0; // extra minutes used this session
 let extensionsCount = 0; // how often "+" was pressed this session
 let breakMinutes = 5; // the break the user will take
 let recommendedBreak = 5;
+let stats = loadStats(); // today's numbers
+// Adds to one of today's numbers and saves right away
+function addToStats(key, amount) {
+    if (stats.date !== todayKey())
+        stats = loadStats(); // past midnight: a new day
+    stats[key] += amount;
+    saveStats(stats);
+}
 const pausesLeft = () => pauseBudget(sessionMinutes) - pausesUsed;
 const extraLeft = () => extensionBudget(sessionMinutes) - extensionUsed;
 const workedMinutes = () => sessionMinutes + extensionUsed;
@@ -135,6 +148,7 @@ function pause() {
     remainingMs = endTime - now;
     pauseEndsAt = now + PAUSE_MAX_MINUTES * MINUTE;
     pausesUsed++;
+    addToStats("pauses", 1);
     phase = "paused";
     messageEl.textContent = `Paused. The timer continues in ${PAUSE_MAX_MINUTES} minutes either way.`;
     render();
@@ -165,6 +179,7 @@ function extend(minutes) {
     messageEl.textContent =
         EXTEND_MESSAGES[Math.min(extensionsCount, EXTEND_MESSAGES.length - 1)];
     extensionUsed += minutes;
+    addToStats("extensionMinutes", minutes);
     extensionsCount++;
     render();
 }
@@ -187,6 +202,8 @@ function finishFocus() {
 function startBreak() {
     if (phase !== "focus-done")
         return;
+    addToStats("sessions", 1);
+    addToStats("focusMinutes", workedMinutes());
     phase = "break";
     endTime = Date.now() + breakMinutes * MINUTE; // same end-time trick as focus
     messageEl.textContent = "Stand up, stretch, look out of a window.";
@@ -288,6 +305,12 @@ function breakHintText() {
             return `💡 About 1 minute of rest for every 5 you work is a good rhythm. For ${worked} min, that's ${recommendedBreak} min.`;
     }
 }
+function renderStats() {
+    statSessionsEl.textContent = String(stats.sessions);
+    statFocusEl.textContent = `${stats.focusMinutes} min`;
+    statExtraEl.textContent = `${stats.extensionMinutes} min`;
+    statPausesEl.textContent = String(stats.pauses);
+}
 function render() {
     appEl.dataset.phase = phase;
     phaseLabelEl.textContent = PHASE_LABELS[phase];
@@ -356,6 +379,7 @@ function render() {
         button.disabled = isRunning && !isSelected;
     });
     renderBudget();
+    renderStats();
 }
 // ===== The tick: runs 4 times per second =====
 function tick() {
