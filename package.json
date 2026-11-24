@@ -1,14 +1,14 @@
 {
   "name": "good-enough",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-  "build": "tsc",
-  "watch": "tsc --watch",
-  "format": "prettier --write src css index.html",
-  "format:check": "prettier --check src css index.html"
-},
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "format": "prettier --write src css index.html",
+    "format:check": "prettier --check src css index.html"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ShirazMK/good-enough.git"
@@ -20,7 +20,6 @@
   "bugs": {
     "url": "https://github.com/ShirazMK/good-enough/issues"
   },
-  
   "homepage": "https://github.com/ShirazMK/good-enough#readme",
   "devDependencies": {
     "prettier": "^3.10.1",
