@@ -24,8 +24,8 @@ export function chime(kind: "focus-end" | "break-end"): void {
   notes.forEach((frequency, i) => {
     if (!audio) return;
     const oscillator = audio.createOscillator(); // makes the tone
-    const gain = audio.createGain();             // controls the volume
-    const t = start + i * 0.18;                  // each note starts a little later
+    const gain = audio.createGain(); // controls the volume
+    const t = start + i * 0.18; // each note starts a little later
 
     oscillator.type = "sine"; // the softest wave shape
     oscillator.frequency.value = frequency;
